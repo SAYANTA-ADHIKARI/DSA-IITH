@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <math.h>
 
-int *random_number_generator(int M, int N)
+int *randomNumberGenerator(int M, int N)
 {
     int in, im = 0;
     int *vector = (int *)malloc(sizeof(int) * M);

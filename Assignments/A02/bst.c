@@ -9,11 +9,24 @@ typedef struct BSTNode
     struct BSTNode *parent;
 } BSTNode;
 
+int height(BSTNode *root)
+{
+    if (root == NULL)
+        return -1;
+    else
+        return root->height;
+}
+
+int max(int a, int b)
+{
+    return (a > b) ? a : b;
+}
+
 BSTNode *createNode(int data)
 {
     BSTNode *newNode = (BSTNode *)malloc(sizeof(BSTNode));
     newNode->data = data;
-    newNode->height = 0;
+    newNode->height = 1;
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->parent = NULL;
@@ -37,6 +50,11 @@ BSTNode *insert(BSTNode *root, int data)
         root->right = insert(root->right, data);
         root->right->parent = root;
     }
+    else
+        return root; // Duplicate values are not allowed
+
+    root->height = 1 + max(height(root->left), height(root->right));
+
     return root;
 }
 
@@ -72,51 +90,39 @@ BSTNode *findMax(BSTNode *root)
         return findMax(root->right);
 }
 
-BSTNode *findSuccessor(BSTNode *root, int data)
+BSTNode *findSuccessor(BSTNode *root)
 {
-    BSTNode *current = search(root, data);
-    if (current == NULL)
+    if (root == NULL)
         return NULL;
-    else if (current->right != NULL)
-        return findMin(current->right);
+    else if (root->right != NULL)
+        return findMin(root->right);
     else
     {
-        BSTNode *successor = NULL;
-        BSTNode *ancestor = root;
-        while (ancestor != current)
+        BSTNode *successor = root->parent;
+        BSTNode *current = root;
+        while (successor != NULL && current == successor->right)
         {
-            if (current->data < ancestor->data)
-            {
-                successor = ancestor;
-                ancestor = ancestor->left;
-            }
-            else
-                ancestor = ancestor->right;
+            current = successor;
+            successor = successor->parent;
         }
         return successor;
     }
 }
 
-BSTNode *findPredecessor(BSTNode *root, int data)
+BSTNode *findPredecessor(BSTNode *root)
 {
-    BSTNode *current = search(root, data);
-    if (current == NULL)
+    if (root == NULL)
         return NULL;
-    else if (current->left != NULL)
-        return findMax(current->left);
+    else if (root->left != NULL)
+        return findMax(root->left);
     else
     {
-        BSTNode *predecessor = NULL;
-        BSTNode *ancestor = root;
-        while (ancestor != current)
+        BSTNode *predecessor = root->parent;
+        BSTNode *current = root;
+        while (predecessor != NULL && current == predecessor->left)
         {
-            if (current->data > ancestor->data)
-            {
-                predecessor = ancestor;
-                ancestor = ancestor->right;
-            }
-            else
-                ancestor = ancestor->left;
+            current = predecessor;
+            predecessor = predecessor->parent;
         }
         return predecessor;
     }
@@ -156,5 +162,38 @@ BSTNode *deleteNode(BSTNode *root, int data)
             root->right = deleteNode(root->right, temp->data);
         }
     }
+
+    if (root == NULL)
+        return root;
+
+    root->height = 1 + max(height(root->left), height(root->right));
+
     return root;
+}
+
+void printInorder(BSTNode *root)
+{
+    if (root == NULL)
+        return;
+    printInorder(root->left);
+    printf("%d\t", root->data);
+    printInorder(root->right);
+}
+
+void printPreorder(BSTNode *root)
+{
+    if (root == NULL)
+        return;
+    printf("%d\t", root->data);
+    printPreorder(root->left);
+    printPreorder(root->right);
+}
+
+void printPostorder(BSTNode *root)
+{
+    if (root == NULL)
+        return;
+    printPostorder(root->left);
+    printPostorder(root->right);
+    printf("%d\t", root->data);
 }
