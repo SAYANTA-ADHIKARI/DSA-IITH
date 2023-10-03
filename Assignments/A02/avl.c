@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+int pointerOperationsAVL = 0;
+int comparisonsAVL = 0;
+
 typedef struct AVLNode
 {
     int data;
@@ -11,6 +14,7 @@ typedef struct AVLNode
 
 int height(AVLNode *node)
 {
+    // One comparasion
     if (node == NULL)
         return -1;
     return node->height;
@@ -18,11 +22,13 @@ int height(AVLNode *node)
 
 int max(int a, int b)
 {
+    // One comparasion
     return (a > b) ? a : b;
 }
 
 int getBalance(AVLNode *node)
 {
+    // One comparasion
     if (node == NULL)
         return 0;
     return height(node->left) - height(node->right);
@@ -30,8 +36,10 @@ int getBalance(AVLNode *node)
 
 void updateHeight(AVLNode *node)
 {
+    // One comparasion
     if (node == NULL)
         return;
+    // One Pointer Operation
     node->height = 1 + max(height(node->left), height(node->right));
 }
 
@@ -43,10 +51,13 @@ AVLNode *leftRotate(AVLNode *x)
     y->left = x;
     x->right = T2;
 
+    // Four Pointer Operations
     if (T2 != NULL)
+        // One Pointer Operation
         T2->parent = x;
 
     x->parent = y;
+    // One Pointer Operation and one Comparasion
 
     updateHeight(x);
     updateHeight(y);
@@ -62,10 +73,13 @@ AVLNode *rightRotate(AVLNode *y)
     x->right = y;
     y->left = T2;
 
+    // Four Pointer Operations
     if (T2 != NULL)
+        // One Pointer Operation
         T2->parent = y;
 
     y->parent = x;
+    // One Pointer Operation and one Comparasion
 
     updateHeight(y);
     updateHeight(x);
@@ -83,16 +97,20 @@ AVLNode *balanceNode(AVLNode *node)
     {
         if (getBalance(node->left) < 0)
             node->left = leftRotate(node->left);
+        // One Pointer Operation
+        // One Comparasion
         return rightRotate(node);
     }
-
+    // One Comparasion
     if (balance < -1)
     {
         if (getBalance(node->right) > 0)
             node->right = rightRotate(node->right);
+        // One Pointer Operation
+        // One Comparasion
         return leftRotate(node);
     }
-
+    // One Comparasion
     return node;
 }
 
@@ -100,10 +118,11 @@ AVLNode *createNode(int data)
 {
     AVLNode *newNode = (AVLNode *)malloc(sizeof(AVLNode));
     newNode->data = data;
-    newNode->height = 1;
+    newNode->height = 0;
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->parent = NULL;
+    // Five Pointer Operations
     return newNode;
 }
 
@@ -114,8 +133,7 @@ AVLNode *insert(AVLNode *node, int data)
         node = createNode(data);
         return node;
     }
-
-    if (data < node->data)
+    else if (data < node->data)
         node->left = insert(node->left, data);
     else if (data > node->data)
         node->right = insert(node->right, data);
@@ -254,4 +272,10 @@ void printPostorder(AVLNode *node)
     printPostorder(node->left);
     printPostorder(node->right);
     printf("%d\t", node->data);
+}
+
+void resetCountersAVL()
+{
+    pointerOperationsAVL = 0;
+    comparisonsAVL = 0;
 }
