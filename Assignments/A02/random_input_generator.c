@@ -29,7 +29,7 @@ int *randomNumberGenerator(int M, int N)
     return vector;
 }
 
-void main()
+void inputGenerator()
 {
     int M, N, T;
     char filename[100];
@@ -54,7 +54,7 @@ void main()
         srand(seed);
 
         // Generating random sequence of numbers
-        int *vector = random_number_generator(M, N);
+        int *vector = randomNumberGenerator(M, N);
 
         // Writing the sequence to file
         for (int j = 0; j < M; j++)
@@ -62,4 +62,5 @@ void main()
         fprintf(fp, "\n");
     }
     fclose(fp); // Closing the file
+    printf("File %s created successfully\n", filename);
 }
