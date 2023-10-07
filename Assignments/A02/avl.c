@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-int pointerOperationsAVL = 0;
-int comparisonsAVL = 0;
+int pointerOperations = 0;
+int comparisons = 0;
 
 typedef struct AVLNode
 {
@@ -15,6 +15,7 @@ typedef struct AVLNode
 int height(AVLNode *node)
 {
     // One comparasion
+    comparisons++;
     if (node == NULL)
         return -1;
     return node->height;
@@ -23,12 +24,14 @@ int height(AVLNode *node)
 int max(int a, int b)
 {
     // One comparasion
+    comparisons++;
     return (a > b) ? a : b;
 }
 
 int getBalance(AVLNode *node)
 {
     // One comparasion
+    comparisons++;
     if (node == NULL)
         return 0;
     return height(node->left) - height(node->right);
@@ -37,9 +40,11 @@ int getBalance(AVLNode *node)
 void updateHeight(AVLNode *node)
 {
     // One comparasion
+    comparisons++;
     if (node == NULL)
         return;
     // One Pointer Operation
+    pointerOperations++;
     node->height = 1 + max(height(node->left), height(node->right));
 }
 
@@ -50,14 +55,18 @@ AVLNode *leftRotate(AVLNode *x)
 
     y->left = x;
     x->right = T2;
-
     // Four Pointer Operations
+    pointerOperations += 4;
+
     if (T2 != NULL)
         // One Pointer Operation
-        T2->parent = x;
+        pointerOperations++;
+    T2->parent = x;
 
     x->parent = y;
     // One Pointer Operation and one Comparasion
+    pointerOperations++;
+    comparisons++;
 
     updateHeight(x);
     updateHeight(y);
@@ -72,14 +81,18 @@ AVLNode *rightRotate(AVLNode *y)
 
     x->right = y;
     y->left = T2;
-
     // Four Pointer Operations
+    pointerOperations += 4;
+
     if (T2 != NULL)
         // One Pointer Operation
-        T2->parent = y;
+        pointerOperations++;
+    T2->parent = y;
 
     y->parent = x;
     // One Pointer Operation and one Comparasion
+    pointerOperations++;
+    comparisons++;
 
     updateHeight(y);
     updateHeight(x);
@@ -93,24 +106,36 @@ AVLNode *balanceNode(AVLNode *node)
 
     int balance = getBalance(node);
 
+    // One Comparasion
+    comparisons++;
     if (balance > 1)
     {
-        if (getBalance(node->left) < 0)
-            node->left = leftRotate(node->left);
-        // One Pointer Operation
         // One Comparasion
+        comparisons++;
+        if (getBalance(node->left) < 0)
+        {
+            node->left = leftRotate(node->left);
+            // One Pointer Operation
+            pointerOperations++;
+        }
+
         return rightRotate(node);
     }
     // One Comparasion
+    comparisons++;
     if (balance < -1)
     {
-        if (getBalance(node->right) > 0)
-            node->right = rightRotate(node->right);
-        // One Pointer Operation
         // One Comparasion
+        comparisons++;
+        if (getBalance(node->right) > 0)
+        {
+            node->right = rightRotate(node->right);
+            // One Pointer Operation
+            pointerOperations++;
+        }
+
         return leftRotate(node);
     }
-    // One Comparasion
     return node;
 }
 
@@ -122,7 +147,8 @@ AVLNode *createNode(int data)
     newNode->left = NULL;
     newNode->right = NULL;
     newNode->parent = NULL;
-    // Five Pointer Operations
+    // Three Pointer Operations
+    pointerOperations += 3;
     return newNode;
 }
 
@@ -131,116 +157,223 @@ AVLNode *insert(AVLNode *node, int data)
     if (node == NULL)
     {
         node = createNode(data);
+        // one Comparision and one pointer operation
+        pointerOperations++;
+        comparisons++;
         return node;
     }
     else if (data < node->data)
+    {
         node->left = insert(node->left, data);
+        node->left->parent = node;
+        // two Comparision and two pointer operation
+        pointerOperations += 2;
+        comparisons += 2;
+    }
     else if (data > node->data)
+    {
         node->right = insert(node->right, data);
+        node->right->parent = node;
+        // three Comparision and two pointer operation
+        pointerOperations += 2;
+        comparisons += 3;
+    }
     else
+    {
+        comparisons += 3;
         return node; // Duplicate values are not allowed
-
-    node->parent = NULL;
+    }
 
     return balanceNode(node);
 }
 
-AVLNode *search(AVLNode *node, int data)
+AVLNode *search(AVLNode *root, int data)
 {
-    if (node == NULL)
+    if (root == NULL)
+    { // One Comparision
+        comparisons++;
         return NULL;
-    else if (data < node->data)
-        return search(node->left, data);
-    else if (data > node->data)
-        return search(node->right, data);
+    }
+    else if (root->data == data)
+    { // Two Comparisions
+        comparisons += 2;
+        return root;
+    }
+    else if (data < root->data)
+    { // Three Comparisions
+        comparisons += 3;
+        return search(root->left, data);
+    }
     else
-        return node;
-}
-
-AVLNode *findMin(AVLNode *node)
-{
-    if (node == NULL)
-        return NULL;
-    else if (node->left == NULL)
-        return node;
-    else
-        return findMin(node->left);
-}
-
-AVLNode *findMax(AVLNode *node)
-{
-    if (node == NULL)
-        return NULL;
-    else if (node->right == NULL)
-        return node;
-    else
-        return findMax(node->right);
-}
-
-AVLNode *findSuccessor(AVLNode *node)
-{
-    if (node == NULL)
-        return NULL;
-    else if (node->right != NULL)
-        return findMin(node->right);
-    else
-    {
-        AVLNode *temp = node->parent;
-        while (temp != NULL && node == temp->right)
-        {
-            node = temp;
-            temp = temp->parent;
-        }
-        return temp;
+    { // Three Comparisions
+        comparisons += 3;
+        return search(root->right, data);
     }
 }
 
-AVLNode *findPredecessor(AVLNode *node)
+AVLNode *findMin(AVLNode *root)
 {
-    if (node == NULL)
+    if (root == NULL)
+    { // One Comparision
+        comparisons++;
         return NULL;
-    else if (node->left != NULL)
-        return findMax(node->left);
+    }
+    else if (root->left == NULL)
+    { // Two Comparisions
+        comparisons += 2;
+        return root;
+    }
+    else
+    { // Two Comparisions
+        comparisons += 2;
+        return findMin(root->left);
+    }
+}
+
+AVLNode *findMax(AVLNode *root)
+{
+    if (root == NULL)
+    { // One Comparision
+        comparisons++;
+        return NULL;
+    }
+    else if (root->right == NULL)
+    { // Two Comparisions
+        comparisons += 2;
+        return root;
+    }
+    else
+    { // Two Comparisions
+        comparisons += 2;
+        return findMax(root->right);
+    }
+}
+
+AVLNode *findSuccessor(AVLNode *root)
+{
+    if (root == NULL)
+    { // One Comparision
+        comparisons++;
+        return NULL;
+    }
+    else if (root->right != NULL)
+    { // Two Comparisions
+        comparisons += 2;
+        return findMin(root->right);
+    }
     else
     {
-        AVLNode *temp = node->parent;
-        while (temp != NULL && node == temp->left)
+        AVLNode *successor = root->parent;
+        AVLNode *current = root;
+        while (successor != NULL && current == successor->right)
         {
-            node = temp;
-            temp = temp->parent;
+            current = successor;
+            successor = successor->parent;
+            // Two Comparisions and two pointer operations
+            comparisons += 2;
+            pointerOperations += 2;
         }
-        return temp;
+        // Three Comparisions or Four Comparisions (Assuming in general 3 comparisions)
+        /* The above has two conditions to check which is then joined with an AND operator so if we
+        consider the worst case then it will be 4 comparisions
+        */
+        comparisons += 4;
+        return successor;
+    }
+}
+
+AVLNode *findPredecessor(AVLNode *root)
+{
+    if (root == NULL)
+    { // One Comparision
+        comparisons++;
+        return NULL;
+    }
+    else if (root->left != NULL)
+    { // Two Comparisions
+        comparisons += 2;
+        return findMax(root->left);
+    }
+    else
+    {
+        AVLNode *predecessor = root->parent;
+        AVLNode *current = root;
+        // Two Pointer Operations
+        pointerOperations += 2;
+        while (predecessor != NULL && current == predecessor->left)
+        {
+            current = predecessor;
+            predecessor = predecessor->parent;
+            // Two Comparisions and two pointer operations
+            comparisons += 2;
+            pointerOperations += 2;
+        }
+        // Three Comparisions or Four Comparisions (Assuming in general 3 comparisions)
+        /* The above has two conditions to check which is then joined with an AND operator so if we
+        consider the worst case then it will be 4 comparisions
+        */
+        comparisons += 4;
+        return predecessor;
     }
 }
 
 AVLNode *deleteNode(AVLNode *node, int data)
 {
     if (node == NULL)
+    {
+        // One comparision
+        comparisons++;
         return node;
-
+    }
     if (data < node->data)
+    {
+        // Two Comparisions
+        comparisons += 2;
         node->left = deleteNode(node->left, data);
+        // One pointer operations
+        pointerOperations++;
+    }
     else if (data > node->data)
+    {
+        // Three Comparisions
+        comparisons += 3;
         node->right = deleteNode(node->right, data);
+        // One pointer operation
+        pointerOperations++;
+    }
     else
     {
+        // Three Comparasions
+        comparisons += 3;
         if (node->left == NULL)
         {
+            // One comparision
+            comparisons++;
             AVLNode *temp = node->right;
+            // One pointer operation
+            pointerOperations++;
             free(node);
             return temp;
         }
         else if (node->right == NULL)
         {
+            // Two Comparision
+            comparisons += 2;
             AVLNode *temp = node->left;
+            // One pointer operation
+            pointerOperations++;
             free(node);
             return temp;
         }
         else
         {
+            // Two Comparasions
+            comparisons += 2;
             AVLNode *temp = findMin(node->right);
             node->data = temp->data;
             node->right = deleteNode(node->right, temp->data);
+            // Three pointer Opreations
+            pointerOperations += 3;
         }
     }
 
@@ -249,6 +382,8 @@ AVLNode *deleteNode(AVLNode *node, int data)
 
 void printInorder(AVLNode *node)
 {
+    // One comparision
+    comparisons++;
     if (node == NULL)
         return;
     printInorder(node->left);
@@ -258,6 +393,8 @@ void printInorder(AVLNode *node)
 
 void printPreorder(AVLNode *node)
 {
+    // One comparision
+    comparisons++;
     if (node == NULL)
         return;
     printf("%d\t", node->data);
@@ -267,6 +404,8 @@ void printPreorder(AVLNode *node)
 
 void printPostorder(AVLNode *node)
 {
+    // One comparision
+    comparisons++;
     if (node == NULL)
         return;
     printPostorder(node->left);
@@ -276,6 +415,6 @@ void printPostorder(AVLNode *node)
 
 void resetCountersAVL()
 {
-    pointerOperationsAVL = 0;
-    comparisonsAVL = 0;
+    pointerOperations = 0;
+    comparisons = 0;
 }

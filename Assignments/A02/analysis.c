@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "bst.c"
-#include "avl.c"
 #include "random_input_generator.c"
+/*Which ever you want to analysis, include that. AVL Tree or BST Tree*/
+#include "bst.c"
+// #include "avl.c"
 
 int *indexToDelete(int count, int upperBound)
 {
