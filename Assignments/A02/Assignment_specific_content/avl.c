@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int pointerOperations = 0;
 int comparisons = 0;
@@ -59,11 +60,12 @@ AVLNode *leftRotate(AVLNode *x)
     pointerOperations += 4;
 
     if (T2 != NULL)
-        // One Pointer Operation
+    { // One Pointer Operation
         pointerOperations++;
-    T2->parent = x;
-
-    x->parent = y;
+        T2->parent = x;
+    }
+    x->parent = y->parent;
+    y->parent = x;
     // One Pointer Operation and one Comparasion
     pointerOperations++;
     comparisons++;
@@ -85,10 +87,11 @@ AVLNode *rightRotate(AVLNode *y)
     pointerOperations += 4;
 
     if (T2 != NULL)
-        // One Pointer Operation
+    { // One Pointer Operation
         pointerOperations++;
-    T2->parent = y;
-
+        T2->parent = y;
+    }
+    x->parent = y->parent;
     y->parent = x;
     // One Pointer Operation and one Comparasion
     pointerOperations++;
@@ -154,6 +157,7 @@ AVLNode *createNode(int data)
 
 AVLNode *insert(AVLNode *node, int data)
 {
+    // printf("Inserting %d\n", data);
     if (node == NULL)
     {
         node = createNode(data);
@@ -183,7 +187,7 @@ AVLNode *insert(AVLNode *node, int data)
         comparisons += 3;
         return node; // Duplicate values are not allowed
     }
-
+    // printf("Balancing %d/%d\n", node->data, node->height);
     return balanceNode(node);
 }
 
@@ -350,8 +354,9 @@ AVLNode *deleteNode(AVLNode *node, int data)
             // One comparision
             comparisons++;
             AVLNode *temp = node->right;
-            // One pointer operation
-            pointerOperations++;
+            // temp->parent = node->parent;
+            // two pointer operation
+            pointerOperations += 1;
             free(node);
             return temp;
         }
@@ -360,8 +365,9 @@ AVLNode *deleteNode(AVLNode *node, int data)
             // Two Comparision
             comparisons += 2;
             AVLNode *temp = node->left;
-            // One pointer operation
-            pointerOperations++;
+            // temp->parent = node->parent;
+            // two pointer operation
+            pointerOperations += 1;
             free(node);
             return temp;
         }
@@ -387,7 +393,7 @@ void printInorder(AVLNode *node)
     if (node == NULL)
         return;
     printInorder(node->left);
-    printf("%d\t", node->data);
+    printf("%d/%d\t", node->data, node->height);
     printInorder(node->right);
 }
 
@@ -397,7 +403,7 @@ void printPreorder(AVLNode *node)
     comparisons++;
     if (node == NULL)
         return;
-    printf("%d\t", node->data);
+    printf("%d/%d\t", node->data, node->height);
     printPreorder(node->left);
     printPreorder(node->right);
 }
@@ -410,10 +416,10 @@ void printPostorder(AVLNode *node)
         return;
     printPostorder(node->left);
     printPostorder(node->right);
-    printf("%d\t", node->data);
+    printf("%d/%d\t", node->data, node->height);
 }
 
-void resetCountersAVL()
+void resetCounters()
 {
     pointerOperations = 0;
     comparisons = 0;

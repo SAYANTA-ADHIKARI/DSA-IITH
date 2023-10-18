@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int pointerOperations = 0;
 int comparisons = 0;
@@ -246,20 +247,22 @@ BSTNode *deleteNode(BSTNode *root, int data)
         else if (root->left == NULL)
         {
             BSTNode *temp = root;
+            root->right->parent = root->parent;
             root = root->right;
             free(temp);
-            // Three Comparisions and two pointer operation
+            // Three Comparisions and three pointer operation
             comparisons += 3;
-            pointerOperations += 2;
+            pointerOperations += 3;
         }
         else if (root->right == NULL)
         {
             BSTNode *temp = root;
+            root->left->parent = root->parent;
             root = root->left;
             free(temp);
-            // Three Comparisions and two pointer operation
+            // Three Comparisions and three pointer operation
             comparisons += 3;
-            pointerOperations += 2;
+            pointerOperations += 3;
         }
         else
         {
@@ -289,7 +292,7 @@ void printInorder(BSTNode *root)
     if (root == NULL)
         return;
     printInorder(root->left);
-    printf("%d\t", root->data);
+    printf("%d/%d\t", root->data, root->height);
     printInorder(root->right);
 }
 
@@ -299,7 +302,7 @@ void printPreorder(BSTNode *root)
     comparisons++;
     if (root == NULL)
         return;
-    printf("%d\t", root->data);
+    printf("%d/%d\t", root->data, root->height);
     printPreorder(root->left);
     printPreorder(root->right);
 }
@@ -312,10 +315,10 @@ void printPostorder(BSTNode *root)
         return;
     printPostorder(root->left);
     printPostorder(root->right);
-    printf("%d\t", root->data);
+    printf("%d/%d\t", root->data, root->height);
 }
 
-void resetCountersBST()
+void resetCounters()
 {
     pointerOperations = 0;
     comparisons = 0;

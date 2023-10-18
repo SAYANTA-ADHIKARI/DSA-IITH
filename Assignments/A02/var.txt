@@ -1,0 +1,7 @@
+BST: 
+    Comparision STD: 3854.7679864811575
+    Pointer Operation STD: 1953.7422985388837
+
+AVL: 
+    Comparision STD: 716.2533000971094
+    Pointer Operation STD: 297.4617830915427
